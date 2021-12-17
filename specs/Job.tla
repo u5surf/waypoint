@@ -1,74 +1,48 @@
--------------------------------- MODULE Job ------------------------------------
+---- MODULE Job ----
 
-EXTENDS Naturals
-CONSTANT Runner
-VARIABLE jobs, runnerState, serverInbox
+vars == <<>>
 
---------------------------------------------------------------------------------
+ServerReceivesJob ==
+  FALSE
 
-vars == <<jobs, runnerState, serverInbox>>
+RunnerRequestsJob ==
+  FALSE
 
---------------------------------------------------------------------------------
-(******************************************************************************)
-(* Types                                                                      *)
-(******************************************************************************)
+ServerAssignsJob ==
+  FALSE
 
-Job == {"INIT"}
-RunnerState == {"READY"}
-RunnerJobStreamMsg == {"ACCEPT"}
-RunnerJobStreamReq == [ sender : Runner, message : RunnerJobStreamMsg ]
+RunnerAcksJob ==
+  FALSE
 
---------------------------------------------------------------------------------
+RunnerNacksJob ==
+  FALSE
 
-TypeOK ==
-  /\ jobs \subseteq Job
-  /\ serverInbox \subseteq RunnerJobStreamReq
-  /\ runnerState \in [ Runner -> RunnerState ]
+AckTimesOut ==
+  FALSE
 
---------------------------------------------------------------------------------
-(******************************************************************************)
-(* Helpers                                                                    *)
-(******************************************************************************)
+JobSucceeds ==
+  FALSE
 
-req(sender, message) ==
-  [ sender |-> sender, message |-> message ]
+JobFails ==
+  FALSE
 
---------------------------------------------------------------------------------
-
-ServerRecvJob ==
-  \E job \in Job :
-    /\ jobs' = jobs \cup {job}
-    /\ UNCHANGED <<runnerState, serverInbox>>
-
-RunnerSendRequest ==
-  \E runner \in Runner :
-    /\ runnerState[runner] = "READY"
-    /\ serverInbox' = serverInbox \cup { req(runner, "REQUEST") }
-    /\ UNCHANGED <<jobs, runnerState>>
-
-ServerRecvRequest ==
-  TRUE \* TODO
-  
---------------------------------------------------------------------------------
+JobExpires ==
+  FALSE
 
 Init ==
-  /\ jobs = {}
-  /\ serverInbox = {}
-  /\ runnerState = [ r \in Runner |-> "READY" ]
+  TRUE
 
 Next ==
-  \/ ServerRecvJob
-  \/ RunnerSendRequest
-  \/ ServerRecvRequest
+  \/ ServerReceivesJob
+  \/ RunnerRequestsJob
+  \/ ServerAssignsJob
+  \/ RunnerAcksJob
+  \/ RunnerNacksJob
+  \/ AckTimesOut
+  \/ JobSucceeds
+  \/ JobFails
+  \/ JobExpires
 
 Spec == Init /\ [][Next]_vars
 
---------------------------------------------------------------------------------
-
-Safety ==
-  TRUE
-
-Liveness ==
-  TRUE
-
-================================================================================
+====
