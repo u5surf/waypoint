@@ -19,6 +19,7 @@ export default class WorkspaceProjectsCreate extends Controller {
     ref.setName(project.name);
     let req = new UpsertProjectRequest();
     req.setProject(ref);
+    debugger;
     try {
       let newProject = await this.api.client.upsertProject(req, this.api.WithMeta());
       this.flashMessages.success(`Project "${project.name}" created`);
